@@ -36,13 +36,14 @@ jobs:
           java-version: '17' # Java 17 o superior es recomendado
 
       # 3. Descarga, Ejecuta el Análisis y Verifica el Quality Gate
+      # 3. Descarga, Ejecuta el Análisis y Verifica el Quality Gate
       - name: Run CodeScene Analysis and Quality Gate Check
         run: |
           echo "Descargando CodeScene CLI desde ${{ env.CODESCENE_URL }}..."
-          # Descarga la herramienta CLI (JAR)
-          curl -sS -O "${{ env.CODESCENE_URL }}/codescene-cli.jar"
+          # 🚨 CAMBIO AQUÍ: Añadimos -L y -f para una descarga más robusta
+          curl -L -f -sS -O "${{ env.CODESCENE_URL }}/codescene-cli.jar" 
 
-          # 3.1. Ejecuta el Análisis. 
+          # 3.1. Ejecuta el Análisis.
           # Utilizamos los secretos de GitHub para el token (CODESCENE_PAT)
           echo "Iniciando análisis para el proyecto ${{ env.CODESCENE_PROJECT }}..."
           java -jar codescene-cli.jar analyze \
@@ -53,7 +54,6 @@ jobs:
             --resultsFile "codescene-results.json"
             
           # 3.2. Verifica el Quality Gate (Umbral de Calidad).
-          # Si CodeScene detecta una violación crítica, esta línea fallará el workflow.
           echo "Verificando Quality Gate..."
           java -jar codescene-cli.jar check-quality-gate \
             --resultsFile "codescene-results.json"
