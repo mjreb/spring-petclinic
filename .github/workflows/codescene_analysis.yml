@@ -17,7 +17,7 @@ jobs:
     
     # Define las variables a usar
     env:
-      CODESCENE_URL: "https://codescene.io"
+      CODESCENE_URL: "https://codescene.com/static/codescene-cli.jar"
       CODESCENE_PROJECT: "spring-petclinic" # Tu nombre de proyecto en CodeScene
       
     steps:
@@ -39,9 +39,9 @@ jobs:
       # 3. Descarga, Ejecuta el Análisis y Verifica el Quality Gate
       - name: Run CodeScene Analysis and Quality Gate Check
         run: |
-          echo "Descargando CodeScene CLI desde ${{ env.CODESCENE_URL }}..."
-          # 🚨 CAMBIO AQUÍ: Añadimos -L y -f para una descarga más robusta
-          curl -L -f -sS -O "${{ env.CODESCENE_URL }}/codescene-cli.jar" 
+          echo "Descargando CodeScene CLI desde la nueva URL..."
+          # 🚨 CAMBIO DE URL: Usaremos la URL de descarga directa y estática
+          curl -L -f -sS -O "https://codescene.com/static/codescene-cli.jar"
 
           # 3.1. Ejecuta el Análisis.
           # Utilizamos los secretos de GitHub para el token (CODESCENE_PAT)
