@@ -1,59 +1,48 @@
 name: CodeScene CI/CD Analysis
 
-# Define cuándo se dispara el workflow: en cada 'push' a la rama principal
 on:
   push:
     branches:
       - main
       - master
-  # También puedes añadir 'pull_request' si quieres analizar antes de fusionar:
-  # pull_request:
-  #   branches:
-  #     - main
       
 jobs:
   analyze:
     runs-on: ubuntu-latest
     
-    # Define las variables a usar
     env:
-      CODESCENE_URL: "https://codescene.com/static/codescene-cli.jar"
-      CODESCENE_PROJECT: "spring-petclinic" # Tu nombre de proyecto en CodeScene
+      # ✅ CORREGIDO: Vuelve a ser la URL del SERVIDOR/API.
+      CODESCENE_URL: "https://codescene.io" 
+      CODESCENE_PROJECT: "spring-petclinic" 
       
     steps:
-      # 1. Checkout del código
-      # ¡CRUCIAL!: fetch-depth: 0 asegura que CodeScene pueda analizar el historial de Git
       - name: Checkout Repository with Full History
-        uses: actions/checkout@v4
+        uses: actions:checkout@v4
         with:
           fetch-depth: 0 
 
-      # 2. Configura Java (necesario para la CodeScene CLI)
       - name: Set up Java Environment
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17' # Java 17 o superior es recomendado
+          java-version: '17'
 
-      # 3. Descarga, Ejecuta el Análisis y Verifica el Quality Gate
-      # 3. Descarga, Ejecuta el Análisis y Verifica el Quality Gate
       - name: Run CodeScene Analysis and Quality Gate Check
         run: |
-          echo "Descargando CodeScene CLI desde la nueva URL..."
-          # 🚨 CAMBIO DE URL: Usaremos la URL de descarga directa y estática
-          curl -L -f -sS -O "https://codescene.com/static/codescene-cli.jar"
+          echo "Descargando CodeScene CLI..."
+          # ✅ CORRECTO: Usamos la URL directa y estática para la descarga.
+          curl -L -f -sS -O "https://codescene.com/static/codescene-cli.jar" 
 
-          # 3.1. Ejecuta el Análisis.
-          # Utilizamos los secretos de GitHub para el token (CODESCENE_PAT)
+          # 3.1. Ejecuta el Análisis. Usamos la variable CODESCENE_URL (el servidor) aquí.
           echo "Iniciando análisis para el proyecto ${{ env.CODESCENE_PROJECT }}..."
           java -jar codescene-cli.jar analyze \
-            --url "${{ env.CODESCENE_URL }}" \
+            --url "${{ env.CODESCENE_URL }}" \ 
             --project "${{ env.CODESCENE_PROJECT }}" \
             --repository "." \
             --accessToken "${{ secrets.CODESCENE_PAT }}" \
             --resultsFile "codescene-results.json"
             
-          # 3.2. Verifica el Quality Gate (Umbral de Calidad).
+          # 3.2. Verifica el Quality Gate.
           echo "Verificando Quality Gate..."
           java -jar codescene-cli.jar check-quality-gate \
             --resultsFile "codescene-results.json"
