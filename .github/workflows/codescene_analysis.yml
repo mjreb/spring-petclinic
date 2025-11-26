@@ -29,7 +29,7 @@ jobs:
       - name: Run CodeScene Analysis and Quality Gate Check
         run: |
           echo "Descargando CodeScene CLI..."
-          curl -L -f -sS -O "https://codescene.com/static/codescene-cli.jar"
+          curl -L -f -sS -o codescene-cli.jar "https://codescene.io/downloads/codescene-cli/codescene-cli-latest.jar"
 
           echo "Iniciando análisis para el proyecto ${{ env.CODESCENE_PROJECT }}..."
           java -jar codescene-cli.jar analyze \
