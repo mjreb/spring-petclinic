@@ -26,10 +26,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Run CodeScene Analysis and Quality Gate Check
+      - name: Download CodeScene CLI
         run: |
-          echo "Descargando CodeScene CLI..."
-          curl -L -o codescene-cli.jar "https://codescene.io/downloads/codescene-cli/codescene-cli-latest.jar"
+          curl -L -o codescene-cli.jar \
+            -H "Authorization: Bearer ${{ secrets.CODESCENE_PAT }}" \
+            "https://codescene.io/api/v1/downloads/codescene-cli-latest.jar"
+
 
           echo "Iniciando análisis para el proyecto ${{ env.CODESCENE_PROJECT }}..."
           java -jar codescene-cli.jar analyze \
