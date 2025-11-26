@@ -1,4 +1,4 @@
-name: CodeScene CI/CD Analysis
+name: CodeScene Analysis
 
 on:
   push:
@@ -12,15 +12,16 @@ jobs:
 
     env:
       CODESCENE_URL: "https://codescene.io"
-      CODESCENE_PROJECT: "74249"  
+      CODESCENE_PROJECT: "74249"
+      CS_ACCESS_TOKEN: ${{ secrets.CODESCENE_PAT }}
 
     steps:
-      - name: Checkout Repository with Full History
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Java Environment
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -28,19 +29,23 @@ jobs:
 
       - name: Download CodeScene CLI
         run: |
-          curl -L -o codescene-cli.jar \
-            -H "Authorization: Bearer ${{ secrets.CODESCENE_PAT }}" \
-            "https://codescene.io/api/v1/downloads/codescene-cli-latest.jar"
+          echo "Descargando CodeScene CLI..."
+          curl -L -H "Authorization: Bearer ${{ secrets.CODESCENE_PAT }}" \
+               -o codescene-cli.jar \
+               "https://codescene.io/api/v1/codescene-cli/download"
 
+          echo "Tamaño del archivo descargado:"
+          ls -lh codescene-cli.jar
 
-          echo "Iniciando análisis para el proyecto ${{ env.CODESCENE_PROJECT }}..."
+      - name: Run CodeScene Analysis
+        run: |
           java -jar codescene-cli.jar analyze \
-            --url "${{ env.CODESCENE_URL }}" \
-            --project "${{ env.CODESCENE_PROJECT }}" \
+            --url "$CODESCENE_URL" \
+            --project "$CODESCENE_PROJECT" \
             --repository "." \
-            --accessToken "${{ secrets.CODESCENE_PAT }}" \
             --resultsFile "codescene-results.json"
 
-          echo "Verificando Quality Gate..."
+      - name: Check Quality Gate
+        run: |
           java -jar codescene-cli.jar check-quality-gate \
             --resultsFile "codescene-results.json"
