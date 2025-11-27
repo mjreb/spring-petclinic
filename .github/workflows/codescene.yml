@@ -11,19 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # El checkout no es estrictamente necesario para llamar a la API,
-      # pero lo dejo por si quieres usar info del repo más adelante.
-      - name: Checkout (optional)
-        uses: actions/checkout@v4
-
       - name: Trigger CodeScene analysis via REST API
         env:
-          CS_API_TOKEN: ${{ secrets.CODESCENE_PAT }}     # PAT de CodeScene
-          CS_PROJECT_ID: ${{ secrets.CODESCENE_PROJECT_ID }}   # ID del proyecto en CodeScene
+          CS_API_TOKEN: ${{ secrets.CODESCENE_PAT }}        # Tu PAT de CodeScene
+          CS_PROJECT_ID: ${{ secrets.CODESCENE_PROJECT_ID }} # Debe ser 74249
+          BASE_URL: https://codescene.io
         run: |
           set -e
-          BASE_URL="https://codescene.io"
-          curl -sS -X POST \
+          echo "==> Disparando análisis para el proyecto ${CS_PROJECT_ID}..."
+          HTTP_CODE=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -X POST \
             -H "Accept: application/json" \
             -H "Authorization: Bearer ${CS_API_TOKEN}" \
-            "${BASE_URL}/api/v2/projects/${CS_PROJECT_ID}/run-analysis"
+            "${BASE_URL}/api/v2/projects/${CS_PROJECT_ID}/run-analysis")
+          echo "HTTP ${HTTP_CODE}"
+          cat /tmp/resp.json || true
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "ERROR: La API devolvió estado ${HTTP_CODE}"
+            exit 1
+          fi
+          echo "OK: Análisis disparado correctamente."
