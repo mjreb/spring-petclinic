@@ -25,5 +25,5 @@ jobs:
           BASE_URL="https://codescene.io"
           curl -sS -X POST \
             -H "Accept: application/json" \
-            -H "Authorization: Bearer ${CS_API_TOKEN}" \
+            -H "Authorization: Bearer ${CS_API_TOKEN}" \ 
             "${BASE_URL}/api/v2/projects/${CS_PROJECT_ID}/run-analysis"
