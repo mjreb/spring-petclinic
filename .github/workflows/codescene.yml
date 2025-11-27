@@ -22,7 +22,7 @@ jobs:
           CS_PROJECT_ID: ${{ secrets.CODESCENE_PROJECT_ID }}   # ID del proyecto en CodeScene
         run: |
           set -e
-          BASE_URL="https://api.codescene.io"
+          BASE_URL="https://codescene.io"
           curl -sS -X POST \
             -H "Accept: application/json" \
             -H "Authorization: Bearer ${CS_API_TOKEN}" \
