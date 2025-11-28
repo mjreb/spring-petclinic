@@ -17,9 +17,8 @@ jobs:
 
       - name: Install CodeScene CLI
         run: |
-          curl -s https://downloads.codescene.io/enterprise/cli/codescene-cli-linux.zip -o cli.zip
-          unzip cli.zip -d codescene-cli
-          chmod +x codescene-cli/codescene-cli
+            curl -L "https://codescene.io/codescene-cli/latest/linux-amd64/codescene-cli" -o codescene-cli
+            chmod +x codescene-cli
 
       - name: Run CodeScene Delta Analysis
         env:
