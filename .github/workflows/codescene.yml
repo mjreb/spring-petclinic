@@ -23,11 +23,11 @@ jobs:
       - name: Run CodeScene Delta Analysis
         env:
           CODESCENE_USER: ${{ secrets.CODESCENE_USER }}
-          CODESCENE_TOKEN: ${{ secrets.CODESCENE_TOKEN }}
+          CODESCENE_TOKEN: ${{ secrets.CODESCENE_PAT }}
         run: |
           ./codescene-cli/codescene-cli \
             --user "$CODESCENE_USER" \
-            --password "$CODESCENE_TOKEN" \
+            --password "$CODESCENE_PAT" \
             delta \
             --repository-path "." \
             --project-id YOUR_PROJECT_ID \
