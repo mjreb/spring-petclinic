@@ -1,32 +1,36 @@
-
-name: CodeScene - Trigger Cloud Analysis
+name: CodeScene Delta Analysis
 
 on:
   push:
     branches:
-      - main
+      - "**"     # Ejecuta en TODOS los commits de TODAS las ramas
 
 jobs:
-  codescene-cloud-analysis:
+  codescene:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger CodeScene analysis via REST API
-        env:
-          CS_API_TOKEN: ${{ secrets.CODESCENE_PAT }}        # Tu PAT de CodeScene
-          CS_PROJECT_ID: ${{ secrets.CODESCENE_PROJECT_ID }} # Debe ser 74249
-          BASE_URL: https://codescene.io
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0   # CodeScene necesita historial completo
+
+      - name: Install CodeScene CLI
         run: |
-          set -e
-          echo "==> Disparando análisis para el proyecto ${CS_PROJECT_ID}..."
-          HTTP_CODE=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -X POST \
-            -H "Accept: application/json" \
-            -H "Authorization: Bearer ${CS_API_TOKEN}" \
-            "${BASE_URL}/api/v2/projects/${CS_PROJECT_ID}/run-analysis")
-          echo "HTTP ${HTTP_CODE}"
-          cat /tmp/resp.json || true
-          if [ "$HTTP_CODE" -ge 400 ]; then
-            echo "ERROR: La API devolvió estado ${HTTP_CODE}"
-            exit 1
-          fi
-          echo "OK: Análisis disparado correctamente."
+          curl -s https://downloads.codescene.io/enterprise/cli/codescene-cli-linux.zip -o cli.zip
+          unzip cli.zip -d codescene-cli
+          chmod +x codescene-cli/codescene-cli
+
+      - name: Run CodeScene Delta Analysis
+        env:
+          CODESCENE_USER: ${{ secrets.CODESCENE_USER }}
+          CODESCENE_TOKEN: ${{ secrets.CODESCENE_TOKEN }}
+        run: |
+          ./codescene-cli/codescene-cli \
+            --user "$CODESCENE_USER" \
+            --password "$CODESCENE_TOKEN" \
+            delta \
+            --repository-path "." \
+            --project-id YOUR_PROJECT_ID \
+            --from HEAD~1 \
+            --to HEAD
