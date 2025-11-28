@@ -3,33 +3,20 @@ name: CodeScene Delta Analysis
 on:
   push:
     branches:
-      - "**"     # Ejecuta en TODOS los commits de TODAS las ramas
+      - "**"   # o solo main / develop si prefieres
 
 jobs:
   codescene:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # CodeScene necesita historial completo
-
-      - name: Install CodeScene CLI
-        run: |
-            curl -L "https://codescene.io/codescene-cli/latest/linux-amd64/codescene-cli" -o codescene-cli
-            chmod +x codescene-cli
+          fetch-depth: 0
 
       - name: Run CodeScene Delta Analysis
-        env:
-          CODESCENE_USER: ${{ secrets.CODESCENE_USER }}
-          CODESCENE_TOKEN: ${{ secrets.CODESCENE_PAT }}
-        run: |
-          ./codescene-cli/codescene-cli \
-            --user "$CODESCENE_USER" \
-            --password "$CODESCENE_PAT" \
-            delta \
-            --repository-path "." \
-            --project-id YOUR_PROJECT_ID \
-            --from HEAD~1 \
-            --to HEAD
+        uses: codescene-saas/codescene-github-action@v1  # nombre ejemplar — verifica en Marketplace
+        with:
+          project: ${{ secrets.CODESCENE_PROJECT_ID }}
+          user:    ${{ secrets.CODESCENE_USER }}
+          token:   ${{ secrets.CODESCENE_PAT }}
+          repository: ${{ github.repository }}
